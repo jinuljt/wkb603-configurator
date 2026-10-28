@@ -1,0 +1,21 @@
+name: macOS build and offline checks
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: swift build
+      - name: Offline checks (no device access)
+        run: .build/debug/WKB603Configurator --self-test
+      - name: Universal app
+        run: bash scripts/build-app.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WKB603-Configurator-macOS-universal
+          path: |
+            dist/WKB603-Configurator-macOS-universal.zip
+            dist/SHA256SUMS.txt

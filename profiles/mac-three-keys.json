@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "name": "Mac 三键示例",
+  "mappings": {
+    "109": {
+      "kind": "key",
+      "usage": 44,
+      "modifiers": 8
+    },
+    "115": {
+      "kind": "media",
+      "usage": 205,
+      "modifiers": 0
+    },
+    "116": {
+      "kind": "key",
+      "usage": 31,
+      "modifiers": 10
+    }
+  }
+}
