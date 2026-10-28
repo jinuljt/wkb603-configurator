@@ -4,6 +4,8 @@
 
 原生 SwiftUI + IOKit，无第三方依赖，无需常驻，不监听键盘输入。MIT 开源。
 
+右上角按实际外形显示为一个旋钮。点击旋钮，在菜单选择“按压”“逆时针”或“顺时针”，再编辑对应功能；旋转操作的改键仍需实机验证。
+
 ## 使用
 
 1. 从 [Releases](https://github.com/jinuljt/wkb603-configurator/releases) 下载通用 macOS 应用，解压到本地后打开。支持 macOS 13+、Apple Silicon 和 Intel；Intel 二进制已交叉编译，未在 Intel 实机运行验证。

@@ -9,6 +9,7 @@ struct PhysicalKey: Identifiable {
     let width: Double
     let height: Double
     var editable: Bool { id != 96 } // Fn is handled inside the keyboard.
+    var isRotary: Bool { [14, 15, 16].contains(id) }
 }
 
 enum Layout {
@@ -30,9 +31,9 @@ enum Layout {
         .init(id: 115, usage: 72, label: "Pause", x: 590, y: 32, width: 32, height: 32),
         .init(id: 113, usage: 71, label: "Scroll", x: 634, y: 32, width: 32, height: 32),
         .init(id: 109, usage: 212, label: "Cal", x: 672, y: 32, width: 32, height: 32),
-        .init(id: 14, usage: 209, label: "Vol +", x: 778, y: 36, width: 20, height: 28),
-        .init(id: 15, usage: 210, label: "Vol −", x: 720, y: 36, width: 20, height: 28),
-        .init(id: 16, usage: 211, label: "Mute", x: 748, y: 37, width: 20, height: 20),
+        .init(id: 14, usage: 209, label: "旋钮 · 顺时针", x: 778, y: 36, width: 20, height: 28),
+        .init(id: 15, usage: 210, label: "旋钮 · 逆时针", x: 720, y: 36, width: 20, height: 28),
+        .init(id: 16, usage: 211, label: "旋钮 · 按压", x: 748, y: 37, width: 20, height: 20),
         .init(id: 19, usage: 53, label: "~", x: 20, y: 78, width: 32, height: 32),
         .init(id: 20, usage: 30, label: "1", x: 57, y: 78, width: 32, height: 32),
         .init(id: 21, usage: 31, label: "2", x: 94, y: 78, width: 32, height: 32),

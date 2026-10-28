@@ -156,7 +156,7 @@ struct KeyboardView: View {
             let scale = geometry.size.width / 820
             ZStack(alignment:.topLeading) {
                 RoundedRectangle(cornerRadius:14).fill(Color(nsColor:.controlBackgroundColor))
-                ForEach(Layout.keys) { key in
+                ForEach(Layout.keys.filter { !$0.isRotary }) { key in
                     let action = editor.profile.mappings[key.id]
                     let selected = editor.selected == key.id
                     Button { editor.selected = key.id } label: {
@@ -174,8 +174,51 @@ struct KeyboardView: View {
                     .accessibilityLabel("\(key.label)，\(action?.label ?? "默认功能")")
                     .position(x:(key.x+key.width/2)*scale,y:(key.y+key.height/2)*scale)
                 }
+                RotaryView(editor:editor,scale:scale)
+                    .position(x:759*scale,y:48*scale)
             }.frame(height:280*scale)
         }
+    }
+}
+
+struct RotaryView: View {
+    @ObservedObject var editor: Editor
+    let scale: Double
+    var selected: Bool { Layout.byID[editor.selected]?.isRotary == true }
+    var modified: Bool { [14,15,16].contains { editor.profile.mappings[$0] != nil } }
+    var body: some View {
+        Menu {
+            ForEach([16,15,14],id:\.self) { id in
+                Button {
+                    editor.selected = id
+                } label: {
+                    Text("\(Layout.byID[id]!.label) → \(editor.profile.mappings[id]?.label ?? [14:"音量 +",15:"音量 −",16:"静音"][id]!)")
+                }
+            }
+        } label: {
+            ZStack {
+                HStack {
+                    Image(systemName:"arrow.counterclockwise")
+                    Spacer()
+                    Image(systemName:"arrow.clockwise")
+                }.font(.system(size:11*scale)).foregroundStyle(.secondary)
+                Circle()
+                    .fill(LinearGradient(colors:[Color(nsColor:.textBackgroundColor),Color(nsColor:.controlColor)],startPoint:.topLeading,endPoint:.bottomTrailing))
+                    .frame(width:36*scale,height:36*scale)
+                    .overlay(Circle().stroke(selected ? Color.orange : (modified ? Color.blue : Color.gray.opacity(0.5)),lineWidth:selected ? 2 : 1))
+                ForEach(0..<16,id:\.self) { tick in
+                    Capsule().fill(Color.secondary.opacity(0.35))
+                        .frame(width:scale,height:3*scale)
+                        .offset(y:-14*scale).rotationEffect(.degrees(Double(tick)*22.5))
+                }
+                Circle().fill(modified ? Color.blue.opacity(0.15) : Color(nsColor:.controlBackgroundColor))
+                    .frame(width:22*scale,height:22*scale)
+                Image(systemName:"speaker.slash.fill").font(.system(size:10*scale)).foregroundStyle(.secondary)
+            }.frame(width:76*scale,height:46*scale)
+        }
+        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+        .help("点击旋钮，选择按压、顺时针或逆时针操作")
+        .accessibilityLabel("旋钮，选择按压、顺时针或逆时针操作")
     }
 }
 
@@ -188,7 +231,7 @@ struct KeyEditor: View {
     var body: some View {
         VStack(alignment:.leading,spacing:18) {
             Text("修改按键").font(.headline)
-            Text(key.label).font(.system(size:32,weight:.semibold,design:.rounded))
+            Text(key.label).font(.system(size:key.isRotary ? 24 : 32,weight:.semibold,design:.rounded))
             Text("当前方案：\(editor.profile.mappings[key.id]?.label ?? "默认功能")").foregroundStyle(.secondary)
             Picker("功能类型",selection:$kind) {
                 Text("按键 / 组合键").tag(ActionKind.key)
@@ -236,6 +279,8 @@ struct KeyEditor: View {
     private func loadSelection() {
         if let action = editor.profile.mappings[key.id] {
             kind = action.kind; target = action.usage; modifiers = action.modifiers
+        } else if key.isRotary {
+            kind = .media; target = [14:0xe9,15:0xea,16:0xe2][key.id]!; modifiers = 0
         } else {
             kind = .key; target = Catalog.keyboard.contains(where:{$0.id == key.usage}) ? key.usage : 4; modifiers = 0
         }
