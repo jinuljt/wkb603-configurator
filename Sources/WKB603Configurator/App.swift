@@ -183,19 +183,12 @@ struct KeyboardView: View {
 
 struct RotaryView: View {
     @ObservedObject var editor: Editor
+    @State private var showOperations = false
     let scale: Double
     var selected: Bool { Layout.byID[editor.selected]?.isRotary == true }
     var modified: Bool { [14,15,16].contains { editor.profile.mappings[$0] != nil } }
     var body: some View {
-        Menu {
-            ForEach([16,15,14],id:\.self) { id in
-                Button {
-                    editor.selected = id
-                } label: {
-                    Text("\(Layout.byID[id]!.label) → \(editor.profile.mappings[id]?.label ?? [14:"音量 +",15:"音量 −",16:"静音"][id]!)")
-                }
-            }
-        } label: {
+        Button { showOperations = true } label: {
             ZStack {
                 HStack {
                     Image(systemName:"arrow.counterclockwise")
@@ -216,9 +209,27 @@ struct RotaryView: View {
                 Image(systemName:"speaker.slash.fill").font(.system(size:10*scale)).foregroundStyle(.secondary)
             }.frame(width:76*scale,height:46*scale)
         }
-        .menuStyle(.borderlessButton).menuIndicator(.hidden).fixedSize()
+        .buttonStyle(.plain).fixedSize()
         .help("点击旋钮，选择按压、顺时针或逆时针操作")
         .accessibilityLabel("旋钮，选择按压、顺时针或逆时针操作")
+        .popover(isPresented:$showOperations,arrowEdge:.bottom) {
+            VStack(alignment:.leading,spacing:14) {
+                Text("选择旋钮操作").font(.headline)
+                ForEach([16,15,14],id:\.self) { id in
+                    Button {
+                        editor.selected = id
+                        showOperations = false
+                    } label: {
+                        HStack {
+                            Text(Layout.byID[id]!.label)
+                            Spacer()
+                            Text(editor.profile.mappings[id]?.label ?? [14:"音量 +",15:"音量 −",16:"静音"][id]!)
+                                .foregroundStyle(.secondary)
+                        }.frame(maxWidth:.infinity).contentShape(Rectangle())
+                    }.buttonStyle(.plain).accessibilityLabel(Layout.byID[id]!.label)
+                }
+            }.padding(18).frame(width:290)
+        }
     }
 }
 
